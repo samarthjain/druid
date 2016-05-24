@@ -13,6 +13,78 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <!-- This should be at top, it makes maven try the central repo first and then others and hence faster dep resolution -->
+            <name>Maven Repository</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- For parquet 1.8.1-nflx-->
+        <repository>
+            <id>ext-releases-local-pom</id>
+            <name>Netflix Artifactory</name>
+            <url>http://artifacts.netflix.com/ext-releases-local-pom</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- For bdurl, benjamin, dse-metric, procrustes, and dse_pig -->
+        <repository>
+            <id>libs-candidates-local</id>
+            <name>Netflix Artifactory</name>
+            <url>http://artifacts.netflix.com/libs-candidates-local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>libs-snapshots-local</id>
+            <name>Netflix Artifactory</name>
+            <url>http://artifacts.netflix.com/libs-snapshots-local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>libs-candidates-local-pom</id>
+            <name>Netflix Artifactory</name>
+            <url>http://artifacts.netflix.com/libs-candidates-local-pom</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>libs-snapshots-local-pom</id>
+            <name>Netflix Artifactory</name>
+            <url>http://artifacts.netflix.com/libs-snapshots-local-pom</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>io.druid.extensions</groupId>
@@ -23,7 +95,7 @@
         <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
-            <version>1.8.2</version>
+            <version>1.8.1-nflx</version>
         </dependency>
         <dependency>
             <groupId>org.xerial.snappy</groupId>
@@ -48,4 +120,26 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
