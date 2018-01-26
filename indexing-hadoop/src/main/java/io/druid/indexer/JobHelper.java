@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.google.common.io.OutputSupplier;
@@ -437,10 +438,36 @@ public class JobHelper
     );
     zipPusher.push();
     log.info("Zipped %,d bytes to [%s]", size.get(), tmpPath.toUri());
-
     final URI indexOutURI = finalIndexZipFilePath.toUri();
+    final ImmutableMap<String, Object> loadSpec;
+    switch (outputFS.getScheme()) {
+        case "hdfs":
+        case "viewfs":
+        case "gs":
+            loadSpec = ImmutableMap.<String, Object>of(
+              "type", "hdfs",
+              "path", indexOutURI.toString()
+            );
+            break;
+        case "s3":
+        case "s3n":
+            loadSpec = ImmutableMap.<String, Object>of(
+              "type", "s3_zip",
+              "bucket", indexOutURI.getHost(),
+              "key", indexOutURI.getPath().substring(1) // remove the leading "/"
+            );
+            break;
+        case "file":
+            loadSpec = ImmutableMap.<String, Object>of(
+              "type", "local",
+              "path", indexOutURI.getPath()
+            );
+            break;
+        default:
+            throw new IAE("Unknown file system scheme [%s]", outputFS.getScheme());
+    }
     final DataSegment finalSegment = segmentTemplate
-        .withLoadSpec(dataSegmentPusher.makeLoadSpec(indexOutURI))
+        .withLoadSpec(loadSpec)
         .withSize(size.get())
         .withBinaryVersion(SegmentUtils.getVersionFromDir(mergedBase));
 
