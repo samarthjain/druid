@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import io.druid.java.util.common.DateTimes;
 import io.druid.java.util.common.UOE;
 import io.druid.java.util.common.guava.Comparators;
+import io.druid.java.util.common.logger.Logger;
 import io.druid.timeline.partition.ImmutablePartitionHolder;
 import io.druid.timeline.partition.PartitionChunk;
 import io.druid.timeline.partition.PartitionHolder;
@@ -64,6 +65,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class VersionedIntervalTimeline<VersionType, ObjectType> implements TimelineLookup<VersionType, ObjectType>
 {
+  private static final Logger log = new Logger(VersionedIntervalTimeline.class);
+
   private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
   final NavigableMap<Interval, TimelineEntry> completePartitionsTimeline = new TreeMap<Interval, TimelineEntry>(
@@ -128,6 +131,9 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       }
 
       add(incompletePartitionsTimeline, interval, entry);
+    } catch (OverlappingSegmentsWithSameVersionException e) {
+        allTimelineEntries.remove(e.getSegment1());
+        allTimelineEntries.remove(e.getSegment2());
     }
     finally {
       lock.writeLock().unlock();
@@ -136,6 +142,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
 
   public PartitionChunk<ObjectType> remove(Interval interval, VersionType version, PartitionChunk<ObjectType> chunk)
   {
+    PartitionChunk<ObjectType> retVal = null;
     try {
       lock.writeLock().lock();
 
@@ -149,7 +156,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
         return null;
       }
 
-      PartitionChunk<ObjectType> retVal = entry.getPartitionHolder().remove(chunk);
+      retVal = entry.getPartitionHolder().remove(chunk);
       if (entry.getPartitionHolder().isEmpty()) {
         versionEntries.remove(version);
         if (versionEntries.isEmpty()) {
@@ -160,7 +167,11 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       }
 
       remove(completePartitionsTimeline, interval, entry, false);
-
+      return retVal;
+    }
+    catch (OverlappingSegmentsWithSameVersionException e) {
+      allTimelineEntries.remove(e.getSegment1());
+      allTimelineEntries.remove(e.getSegment2());
       return retVal;
     }
     finally {
@@ -324,6 +335,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       Interval interval,
       TimelineEntry entry
   )
+          throws OverlappingSegmentsWithSameVersionException
   {
     TimelineEntry existsInTimeline = timeline.get(interval);
 
@@ -366,6 +378,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       Interval key,
       TimelineEntry entry
   )
+          throws OverlappingSegmentsWithSameVersionException
   {
     boolean retVal = false;
     Interval currKey = key;
@@ -416,12 +429,17 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
           // This occurs when restoring segments
           timeline.remove(currKey);
         } else {
-          throw new UOE(
-              "Cannot add overlapping segments [%s and %s] with the same version [%s]",
-              currKey,
-              entryInterval,
-              entry.getVersion()
+          timeline.remove(currKey);
+          timeline.remove(entry.getTrueInterval());
+          log.error(
+              String.format(
+                  "Cannot add overlapping segments [%s and %s] with the same version [%s] skipping, you need to manually mark one of the segments as unused.",
+                  currKey,
+                  entryInterval,
+                  entry.getVersion()
+              )
           );
+          throw new OverlappingSegmentsWithSameVersionException(entry.getVersion().toString(), currKey, entryInterval);
         }
       }
 
@@ -451,6 +469,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       TimelineEntry entry,
       boolean incompleteOk
   )
+          throws OverlappingSegmentsWithSameVersionException
   {
     List<Interval> intervalsToRemove = Lists.newArrayList();
     TimelineEntry removed = timeline.get(interval);
@@ -477,6 +496,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       Interval interval,
       boolean incompleteOk
   )
+          throws OverlappingSegmentsWithSameVersionException
   {
     timeline.remove(interval);
 
@@ -484,7 +504,8 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
       if (versionEntry.getKey().overlap(interval) != null) {
         if (incompleteOk) {
           add(timeline, versionEntry.getKey(), versionEntry.getValue().lastEntry().getValue());
-        } else {
+        }
+        else {
           for (VersionType ver : versionEntry.getValue().descendingKeySet()) {
             TimelineEntry timelineEntry = versionEntry.getValue().get(ver);
             if (timelineEntry.getPartitionHolder().isComplete()) {

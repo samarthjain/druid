@@ -78,6 +78,23 @@ public class VersionedIntervalTimelineTest
   }
 
   @Test
+  public void testOverlappingIntervalWithSameVersion() {
+    add("2018-01-04/2018-01-05", "5", 5);
+    add("2018-02-04/2018-02-07", "5", 5);
+    add("2018-02-05/2018-02-06", "5", 5);
+    add("2018-01-05/2018-01-06", "5", 5);
+
+    assertValues(
+            Arrays.asList(
+                    createExpected("2018-01-04/2018-01-05", "5", 5),
+                    createExpected("2018-01-05/2018-01-06", "5", 5)
+            ),
+            timeline.lookup(new Interval("2018-01-01/2018-04-01"))
+    );
+    // What we expect is none of the two segments being added but a non overlapping segment should be added
+  }
+
+  @Test
   public void testApril() throws Exception
   {
     assertValues(
