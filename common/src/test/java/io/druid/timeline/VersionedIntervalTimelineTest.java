@@ -34,6 +34,7 @@ import io.druid.timeline.partition.PartitionChunk;
 import io.druid.timeline.partition.PartitionHolder;
 import io.druid.timeline.partition.SingleElementPartitionChunk;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
 import org.joda.time.Hours;
 import org.joda.time.Interval;
@@ -89,7 +90,7 @@ public class VersionedIntervalTimelineTest
                     createExpected("2018-01-04/2018-01-05", "5", 5),
                     createExpected("2018-01-05/2018-01-06", "5", 5)
             ),
-            timeline.lookup(new Interval("2018-01-01/2018-04-01"))
+            timeline.lookup(Intervals.of("2018-01-01/2018-04-01"))
     );
     // What we expect is none of the two segments being added but a non overlapping segment should be added
   }
@@ -226,12 +227,18 @@ public class VersionedIntervalTimelineTest
         overallStart.isAfter(timeline.incompletePartitionsTimeline.lastEntry().getKey().getEnd())
     );
 
-    final Interval oneHourInterval1 = new Interval(overallStart.plus(Hours.THREE), overallStart.plus(Hours.FOUR));
-    final Interval oneHourInterval2 = new Interval(overallStart.plus(Hours.FOUR), overallStart.plus(Hours.FIVE));
+    final Interval oneHourInterval1 = Intervals.utc(
+        overallStart.plus(Hours.THREE).getMillis(),
+        overallStart.plus(Hours.FOUR).getMillis()
+    );
+    final Interval oneHourInterval2 = Intervals.utc(
+        overallStart.plus(Hours.FOUR).getMillis(),
+        overallStart.plus(Hours.FIVE).getMillis()
+    );
 
     add(oneHourInterval1, "1", 1);
     add(oneHourInterval2, "1", 1);
-    add(new Interval(overallStart, overallStart.plus(Days.ONE)), "2", 2);
+    add(Intervals.utc(overallStart.getMillis(), overallStart.plus(Days.ONE).getMillis()), "2", 2);
 
     assertValues(
         Collections.singletonList(
@@ -1305,7 +1312,7 @@ public class VersionedIntervalTimelineTest
             createExpected("2011-01-05/2011-01-10", "2", 2),
             createExpected("2011-01-10/2011-01-15", "3", 3)
         ),
-        timeline.lookup(new Interval(DateTimes.EPOCH, DateTimes.MAX))
+        timeline.lookup(Intervals.utc(DateTimes.EPOCH.getMillis(), DateTimes.MAX.getMillis()))
     );
   }
 
