@@ -26,7 +26,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import io.druid.java.util.common.DateTimes;
-import io.druid.java.util.common.UOE;
 import io.druid.java.util.common.guava.Comparators;
 import io.druid.java.util.common.logger.Logger;
 import io.druid.timeline.partition.ImmutablePartitionHolder;
