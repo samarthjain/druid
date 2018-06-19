@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import io.druid.java.util.common.DateTimes;
+import io.druid.java.util.common.StringUtils;
 import io.druid.java.util.common.guava.Comparators;
 import io.druid.java.util.common.logger.Logger;
 import io.druid.timeline.partition.ImmutablePartitionHolder;
@@ -431,7 +432,7 @@ public class VersionedIntervalTimeline<VersionType, ObjectType> implements Timel
           timeline.remove(currKey);
           timeline.remove(entry.getTrueInterval());
           log.error(
-              String.format(
+              StringUtils.format(
                   "Cannot add overlapping segments [%s and %s] with the same version [%s] skipping, you need to manually mark one of the segments as unused.",
                   currKey,
                   entryInterval,
