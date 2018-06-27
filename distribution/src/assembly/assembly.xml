@@ -25,17 +25,6 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/extensions</directory>
-            <includes>
-                <include>*/*</include>
-            </includes>
-            <excludes>
-                <exclude>mysql-metadata-storage/**</exclude>
-            </excludes>
-            <outputDirectory>extensions</outputDirectory>
-        </fileSet>
-
-        <fileSet>
             <directory>${project.build.directory}/hadoop-dependencies</directory>
             <includes>
                 <include>*/*/*</include>
