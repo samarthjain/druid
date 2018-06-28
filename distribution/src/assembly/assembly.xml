@@ -25,6 +25,13 @@
     </formats>
     <fileSets>
         <fileSet>
+            <directory>${project.build.directory}/extensions</directory>
+            <includes>
+                <include>*/*</include>
+            </includes>
+            <outputDirectory>extensions</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/hadoop-dependencies</directory>
             <includes>
                 <include>*/*/*</include>
