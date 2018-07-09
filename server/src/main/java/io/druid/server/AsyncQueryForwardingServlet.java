@@ -48,7 +48,7 @@ import io.druid.server.security.AuthConfig;
 import io.druid.server.security.AuthenticationResult;
 import io.druid.server.security.Authenticator;
 import io.druid.server.security.AuthenticatorMapper;
-import org.apache.http.client.utils.URIBuilder;
+import com.amazonaws.thirdparty.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;

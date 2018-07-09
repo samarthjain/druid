@@ -35,11 +35,11 @@
             <artifactId>druid-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <!-- Use bundled aws sdk instead of relying on explicit aws-sdk modules -->
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-ec2</artifactId>
+            <artifactId>aws-java-sdk-bundle</artifactId>
         </dependency>
-
         <!-- Tests -->
         <dependency>
             <groupId>junit</groupId>

@@ -152,9 +152,10 @@
             </exclusion>
           </exclusions>
         </dependency>
+        <!-- Use bundled aws sdk instead of relying on explicit aws-sdk modules -->
         <dependency>
-          <groupId>com.amazonaws</groupId>
-          <artifactId>aws-java-sdk-s3</artifactId>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-bundle</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
