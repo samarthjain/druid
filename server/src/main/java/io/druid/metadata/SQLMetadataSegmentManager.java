@@ -502,10 +502,7 @@ public class SQLMetadataSegmentManager implements MetadataSegmentManager
           }
         }
 
-        // For performance reasons, make sure we check for the existence of a segment using containsSegment(),
-        // which performs a key-based lookup, instead of calling contains() on the collection returned by
-        // dataSource.getSegments(). In Map values collections, the contains() method is a linear scan.
-        if (!dataSource.containsSegment(segment)) {
+        if (!dataSource.getSegments().contains(segment)) {
           dataSource.addSegment(segment);
         }
       }
