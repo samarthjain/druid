@@ -26,43 +26,44 @@ import com.google.common.base.Preconditions;
 import io.druid.segment.indexing.IOConfig;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public class KafkaIOConfig implements IOConfig
 {
   private static final boolean DEFAULT_USE_TRANSACTION = true;
-  private static final boolean DEFAULT_PAUSE_AFTER_READ = false;
   private static final boolean DEFAULT_SKIP_OFFSET_GAPS = false;
 
+  @Nullable
+  private final Integer taskGroupId;
   private final String baseSequenceName;
   private final KafkaPartitions startPartitions;
   private final KafkaPartitions endPartitions;
   private final Map<String, String> consumerProperties;
   private final boolean useTransaction;
-  private final boolean pauseAfterRead;
   private final Optional<DateTime> minimumMessageTime;
   private final Optional<DateTime> maximumMessageTime;
   private final boolean skipOffsetGaps;
 
   @JsonCreator
   public KafkaIOConfig(
+      @JsonProperty("taskGroupId") @Nullable Integer taskGroupId, // can be null for backward compabitility
       @JsonProperty("baseSequenceName") String baseSequenceName,
       @JsonProperty("startPartitions") KafkaPartitions startPartitions,
       @JsonProperty("endPartitions") KafkaPartitions endPartitions,
       @JsonProperty("consumerProperties") Map<String, String> consumerProperties,
       @JsonProperty("useTransaction") Boolean useTransaction,
-      @JsonProperty("pauseAfterRead") Boolean pauseAfterRead,
       @JsonProperty("minimumMessageTime") DateTime minimumMessageTime,
       @JsonProperty("maximumMessageTime") DateTime maximumMessageTime,
       @JsonProperty("skipOffsetGaps") Boolean skipOffsetGaps
   )
   {
+    this.taskGroupId = taskGroupId;
     this.baseSequenceName = Preconditions.checkNotNull(baseSequenceName, "baseSequenceName");
     this.startPartitions = Preconditions.checkNotNull(startPartitions, "startPartitions");
     this.endPartitions = Preconditions.checkNotNull(endPartitions, "endPartitions");
     this.consumerProperties = Preconditions.checkNotNull(consumerProperties, "consumerProperties");
     this.useTransaction = useTransaction != null ? useTransaction : DEFAULT_USE_TRANSACTION;
-    this.pauseAfterRead = pauseAfterRead != null ? pauseAfterRead : DEFAULT_PAUSE_AFTER_READ;
     this.minimumMessageTime = Optional.fromNullable(minimumMessageTime);
     this.maximumMessageTime = Optional.fromNullable(maximumMessageTime);
     this.skipOffsetGaps = skipOffsetGaps != null ? skipOffsetGaps : DEFAULT_SKIP_OFFSET_GAPS;
@@ -85,6 +86,13 @@ public class KafkaIOConfig implements IOConfig
           partition
       );
     }
+  }
+
+  @Nullable
+  @JsonProperty
+  public Integer getTaskGroupId()
+  {
+    return taskGroupId;
   }
 
   @JsonProperty
@@ -118,12 +126,6 @@ public class KafkaIOConfig implements IOConfig
   }
 
   @JsonProperty
-  public boolean isPauseAfterRead()
-  {
-    return pauseAfterRead;
-  }
-
-  @JsonProperty
   public Optional<DateTime> getMaximumMessageTime()
   {
     return maximumMessageTime;
@@ -145,12 +147,12 @@ public class KafkaIOConfig implements IOConfig
   public String toString()
   {
     return "KafkaIOConfig{" +
-           "baseSequenceName='" + baseSequenceName + '\'' +
+           "taskGroupId=" + taskGroupId +
+           ", baseSequenceName='" + baseSequenceName + '\'' +
            ", startPartitions=" + startPartitions +
            ", endPartitions=" + endPartitions +
            ", consumerProperties=" + consumerProperties +
            ", useTransaction=" + useTransaction +
-           ", pauseAfterRead=" + pauseAfterRead +
            ", minimumMessageTime=" + minimumMessageTime +
            ", maximumMessageTime=" + maximumMessageTime +
            ", skipOffsetGaps=" + skipOffsetGaps +
