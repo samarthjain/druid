@@ -30,6 +30,7 @@ import io.druid.server.log.EmittingRequestLoggerProvider;
 import io.druid.server.log.FileRequestLoggerProvider;
 import io.druid.server.log.FilteredRequestLoggerProvider;
 import io.druid.server.log.LoggingRequestLoggerProvider;
+import io.druid.server.log.NetflixHttpPostRequestLoggerProvider;
 import io.druid.server.log.RequestLogger;
 import io.druid.server.log.RequestLoggerProvider;
 
@@ -61,7 +62,8 @@ public class QueryableModule implements DruidModule
                 FileRequestLoggerProvider.class,
                 LoggingRequestLoggerProvider.class,
                 ComposingRequestLoggerProvider.class,
-                FilteredRequestLoggerProvider.class
+                FilteredRequestLoggerProvider.class,
+                NetflixHttpPostRequestLoggerProvider.class
             )
     );
   }

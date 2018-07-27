@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Http post request logger that sends druid's request log lines to keystone
+ * gateway for eventual persistence to the hive table default.druid_logs
+ */
 public class NetflixHttpPostRequestLogger implements RequestLogger
 {
   private AsyncHttpClient client;
