@@ -11,11 +11,9 @@ import io.druid.java.util.common.logger.Logger;
 import io.druid.query.Query;
 import io.druid.server.RequestLogLine;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.RequestBuilder;
-import org.asynchttpclient.Response;
 
 import java.io.IOException;
 import java.util.Map;
