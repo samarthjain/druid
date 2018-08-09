@@ -41,8 +41,7 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
 
   private static final Logger log = new Logger(NetflixHttpPostRequestLogger.class);
 
-  @LifecycleStart
-  public void start()
+  public NetflixHttpPostRequestLogger()
   {
     client = new DefaultAsyncHttpClient();
   }
