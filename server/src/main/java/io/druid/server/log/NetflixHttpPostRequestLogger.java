@@ -68,7 +68,7 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
       request.setUrl(URL);
       request.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/json");
       request.setBody(body);
-      System.out.println("HTTP post request body: " + body);
+      log.warn("HTTP post request body in NetflixHttpPostRequestLogger: " + body);
 //      client.executeRequest(request, new AsyncCompletionHandler<Response>()
 //      {
 //        @Override
