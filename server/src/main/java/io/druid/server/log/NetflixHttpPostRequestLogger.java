@@ -37,7 +37,7 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
                                     + NETFLIX_STACK
                                     + ".netflix.net/REST/v1/stream/"
                                     + DRUID_LOG_STREAM;
-
+  private static final String BDP_QUERY_ID = "bdp_query_uuid";
 
   private static final Logger log = new Logger(NetflixHttpPostRequestLogger.class);
 
@@ -145,6 +145,7 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
   static class Payload
   {
     private final String queryId;
+    private final String bdpQueryId;
     private final String datasource;
     private final String queryType;
     private final String remoteAddress;
@@ -162,6 +163,7 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
     {
       Query query = logLine.getQuery();
       queryId = query.getId();
+      bdpQueryId = (String) query.getContext().getOrDefault(BDP_QUERY_ID, "");
       datasource = query.getDataSource().toString();
       queryType = query.getType();
       isDescending = query.isDescending();
@@ -241,6 +243,12 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
     public String getInterruptionReason()
     {
       return interruptionReason;
+    }
+
+    @JsonProperty
+    public String getBdpQueryId()
+    {
+      return bdpQueryId;
     }
 
     @JsonProperty
