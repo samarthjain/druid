@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import io.druid.jackson.DefaultObjectMapper;
-import io.druid.java.util.common.lifecycle.LifecycleStart;
 import io.druid.java.util.common.lifecycle.LifecycleStop;
 import io.druid.java.util.common.logger.Logger;
 import io.druid.query.Query;
