@@ -5,16 +5,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import io.druid.jackson.DefaultObjectMapper;
-import io.druid.java.util.common.lifecycle.LifecycleStop;
+import io.druid.java.util.common.concurrent.Execs;
 import io.druid.java.util.common.logger.Logger;
 import io.druid.query.Query;
 import io.druid.server.RequestLogLine;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.util.HashedWheelTimer;
+import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.RequestBuilder;
+import org.asynchttpclient.Response;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,10 +34,12 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
   private static final String NETFLIX_DETAIL = System.getenv("NETFLIX_DETAIL");
   private static final String EC2_REGION = System.getenv("EC2_REGION");
   private static final String DRUID_LOG_STREAM = "druid_logs";
-  private static final String URL = "ksgateway-"
+  private static final String URL = "http://ksgateway-"
                                     + EC2_REGION
+                                    + "."
                                     + NETFLIX_STACK
-                                    + ".netflix.net/REST/v1/stream/"
+                                    + "."
+                                    + "netflix.net/REST/v1/stream/"
                                     + DRUID_LOG_STREAM;
   private static final String BDP_QUERY_ID = "bdp_query_uuid";
 
@@ -42,13 +47,10 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
 
   public NetflixHttpPostRequestLogger()
   {
-    client = new DefaultAsyncHttpClient();
-  }
-
-  @LifecycleStop
-  public void shutdown() throws IOException
-  {
-    client.close();
+    DefaultAsyncHttpClientConfig.Builder asyncClientConfigBuilder = new DefaultAsyncHttpClientConfig.Builder();
+    asyncClientConfigBuilder.setThreadFactory(Execs.makeThreadFactory("nflx-druid-ksgateway-asynchttpclient-%d"));
+    asyncClientConfigBuilder.setNettyTimer(new HashedWheelTimer(Execs.makeThreadFactory("nflx-druid-ksgateway-asynchttpclient-timer-%d")));
+    client = new DefaultAsyncHttpClient(asyncClientConfigBuilder.build());
   }
 
   @Override
@@ -66,21 +68,20 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
       request.setUrl(URL);
       request.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/json");
       request.setBody(body);
-      log.warn("HTTP post request body in NetflixHttpPostRequestLogger: " + body);
-//      client.executeRequest(request, new AsyncCompletionHandler<Response>()
-//      {
-//        @Override
-//        public Response onCompleted(Response response)
-//        {
-//          return response;
-//        }
-//
-//        @Override
-//        public void onThrowable(Throwable t)
-//        {
-//          log.error(t, "Error while making the post request");
-//        }
-//      });
+      client.executeRequest(request, new AsyncCompletionHandler<Response>()
+      {
+        @Override
+        public Response onCompleted(Response response)
+        {
+          return response;
+        }
+
+        @Override
+        public void onThrowable(Throwable t)
+        {
+          log.error(t, "Error while executing the post request");
+        }
+      });
     }
     catch (Throwable e) {
       // Swallow the error and log it so the caller doesn't fail.
