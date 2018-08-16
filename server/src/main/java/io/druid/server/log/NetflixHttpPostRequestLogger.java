@@ -28,7 +28,7 @@ import java.util.UUID;
 public class NetflixHttpPostRequestLogger implements RequestLogger
 {
   private AsyncHttpClient client;
-  private static final String HOST_NAME = System.getenv("HOST_NAME");
+  private static final String HOST_NAME = System.getenv("EC2_LOCAL_IPV4");
   private static final String NETFLIX_APP = System.getenv("NETFLIX_APP");
   private static final String NETFLIX_STACK = System.getenv("NETFLIX_STACK");
   private static final String NETFLIX_DETAIL = System.getenv("NETFLIX_DETAIL");
@@ -275,9 +275,9 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
     }
 
     @JsonProperty
-    public String getHostName()
+    public String getHostname()
     {
-      return hostName;
+      return hostname;
     }
 
     @JsonProperty
@@ -293,14 +293,14 @@ public class NetflixHttpPostRequestLogger implements RequestLogger
     }
 
     private final String appName;
-    private final String hostName;
+    private final String hostname;
     private final boolean ack;
     private final Event event;
 
-    KeyStoneGatewayRequest(String appName, String hostName, boolean ack, RequestLogLine requestLogLine)
+    KeyStoneGatewayRequest(String appName, String hostname, boolean ack, RequestLogLine requestLogLine)
     {
       this.appName = appName;
-      this.hostName = hostName;
+      this.hostname = hostname;
       this.ack = ack;
       this.event = new Event(requestLogLine);
     }
