@@ -70,7 +70,7 @@ public class ZkCoordinator
     this.zkPaths = zkPaths;
     this.me = me;
     this.curator = curator;
-    this.loadSegmentService = Execs.multiThreaded(10, "SegmentLoader");
+    this.loadSegmentService = Execs.multiThreaded(10, "SegmentLoader--%d");
   }
 
   @LifecycleStart
