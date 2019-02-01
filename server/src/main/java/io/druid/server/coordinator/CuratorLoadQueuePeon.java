@@ -273,38 +273,38 @@ public class CuratorLoadQueuePeon extends LoadQueuePeon
           TimeUnit.MILLISECONDS
       );
 
-//      final Stat stat = curator.checkExists().usingWatcher(
-//          (CuratorWatcher) watchedEvent -> {
-//            switch (watchedEvent.getType()) {
-//              case NodeDeleted:
-//                entryRemoved(watchedEvent.getPath());
-//                break;
-//              default:
-//                // do nothing
-//            }
-//          }
-//      ).forPath(path);
-//
-//      if (stat == null) {
-//        final byte[] noopPayload = jsonMapper.writeValueAsBytes(new SegmentChangeRequestNoop());
-//
-//        // Create a node and then delete it to remove the registered watcher.  This is a work-around for
-//        // a zookeeper race condition.  Specifically, when you set a watcher, it fires on the next event
-//        // that happens for that node.  If no events happen, the watcher stays registered foreverz.
-//        // Couple that with the fact that you cannot set a watcher when you create a node, but what we
-//        // want is to create a node and then watch for it to get deleted.  The solution is that you *can*
-//        // set a watcher when you check to see if it exists so, we first create the node and then set a
-//        // watcher on its existence.  However, if already does not exist by the time the existence check
-//        // returns, then the watcher that was set will never fire (nobody will ever create the node
-//        // again) and thus lead to a slow, but real, memory leak.  So, we create another node to cause
-//        // that watcher to fire and delete it right away.
-//        //
-//        // We do not create the existence watcher first, because then it will fire when we create the
-//        // node and we'll have the same race when trying to refresh that watcher.
-//        curator.create().withMode(CreateMode.EPHEMERAL).forPath(path, noopPayload);
-//
-//        entryRemoved(path);
-//      }
+      final Stat stat = curator.checkExists().usingWatcher(
+          (CuratorWatcher) watchedEvent -> {
+            switch (watchedEvent.getType()) {
+              case NodeDeleted:
+                entryRemoved(watchedEvent.getPath());
+                break;
+              default:
+                // do nothing
+            }
+          }
+      ).forPath(path);
+
+      if (stat == null) {
+        final byte[] noopPayload = jsonMapper.writeValueAsBytes(new SegmentChangeRequestNoop());
+
+        // Create a node and then delete it to remove the registered watcher.  This is a work-around for
+        // a zookeeper race condition.  Specifically, when you set a watcher, it fires on the next event
+        // that happens for that node.  If no events happen, the watcher stays registered foreverz.
+        // Couple that with the fact that you cannot set a watcher when you create a node, but what we
+        // want is to create a node and then watch for it to get deleted.  The solution is that you *can*
+        // set a watcher when you check to see if it exists so, we first create the node and then set a
+        // watcher on its existence.  However, if already does not exist by the time the existence check
+        // returns, then the watcher that was set will never fire (nobody will ever create the node
+        // again) and thus lead to a slow, but real, memory leak.  So, we create another node to cause
+        // that watcher to fire and delete it right away.
+        //
+        // We do not create the existence watcher first, because then it will fire when we create the
+        // node and we'll have the same race when trying to refresh that watcher.
+        curator.create().withMode(CreateMode.EPHEMERAL).forPath(path, noopPayload);
+
+        entryRemoved(path);
+      }
     }
     catch (Exception e) {
       failAssign(e);
