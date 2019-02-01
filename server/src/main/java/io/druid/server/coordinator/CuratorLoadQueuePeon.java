@@ -28,13 +28,10 @@ import io.druid.java.util.emitter.EmittingLogger;
 import io.druid.server.coordination.DataSegmentChangeRequest;
 import io.druid.server.coordination.SegmentChangeRequestDrop;
 import io.druid.server.coordination.SegmentChangeRequestLoad;
-import io.druid.server.coordination.SegmentChangeRequestNoop;
 import io.druid.timeline.DataSegment;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 
 import java.util.Collection;
 import java.util.Collections;
